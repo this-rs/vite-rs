@@ -7,7 +7,7 @@ description = "Tiny Vite-like dev server library: serve a static SPA with hot re
 license = "MIT"
 keywords = ["vite", "dev-server", "spa", "hot-reload", "debugging", "ai"]
 categories = ["web-programming::http-server", "development-tools"]
-repository = "https://github.com/DeusData/vite-rs"
+repository = "https://github.com/this-rs/vite-rs"
 
 # Minimal dependencies by design: httparse (HTTP parsing) + serde_json (dev bridge).
 
