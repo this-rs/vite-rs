@@ -246,7 +246,17 @@ fn header_complete(buf: &[u8]) -> Option<usize> {
     buf.windows(4).position(|w| w == b"\r\n\r\n").map(|i| i + 4)
 }
 
-fn parse_headers(buf: &[u8]) -> Result<(String, String, bool, Vec<(String, String)>, u64, bool, bool), ()> {
+struct ParsedRequest {
+    method: String,
+    url: String,
+    http11: bool,
+    headers: Vec<(String, String)>,
+    content_len: u64,
+    want_keepalive: bool,
+    expect_continue: bool,
+}
+
+fn parse_headers(buf: &[u8]) -> Result<ParsedRequest, ()> {
     let mut headers_arr = [httparse::EMPTY_HEADER; MAX_HEADERS];
     let mut parsed = httparse::Request::new(&mut headers_arr);
     match parsed.parse(buf) {
@@ -284,7 +294,15 @@ fn parse_headers(buf: &[u8]) -> Result<(String, String, bool, Vec<(String, Strin
         http11
     };
     let _ = has_len;
-    Ok((method, url, http11, headers, content_len, want_ka, expect_cont))
+    Ok(ParsedRequest {
+        method,
+        url,
+        http11,
+        headers,
+        content_len,
+        want_keepalive: want_ka,
+        expect_continue: expect_cont,
+    })
 }
 
 fn read_request(
@@ -316,9 +334,9 @@ fn read_request(
             Err(_) => return Err(()),
         }
     };
-    let (method, url, http11, headers, content_len, want_keepalive, expect_cont) =
-        parse_headers(&buf[..header_end])?;
-    if expect_cont {
+    let parsed = parse_headers(&buf[..header_end])?;
+    let ParsedRequest { method, url, http11, headers, content_len, want_keepalive, expect_continue } = parsed;
+    if expect_continue {
         let _ = writer.write_all(b"HTTP/1.1 100 Continue\r\n\r\n");
         let _ = writer.flush();
     }
@@ -604,13 +622,13 @@ mod tests {
     #[test]
     fn parses_get() {
         let raw = b"GET /healthz HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n";
-        let (m, u, http11, h, len, ka, exp) = parse_headers(raw).unwrap();
-        assert_eq!(m, "GET");
-        assert_eq!(u, "/healthz");
-        assert!(http11);
-        assert_eq!(len, 0);
-        assert!(!ka);
-        assert!(!exp);
-        assert!(h.iter().any(|(k, _)| k.eq_ignore_ascii_case("host")));
+        let p = parse_headers(raw).unwrap();
+        assert_eq!(p.method, "GET");
+        assert_eq!(p.url, "/healthz");
+        assert!(p.http11);
+        assert_eq!(p.content_len, 0);
+        assert!(!p.want_keepalive);
+        assert!(!p.expect_continue);
+        assert!(p.headers.iter().any(|(k, _)| k.eq_ignore_ascii_case("host")));
     }
 }

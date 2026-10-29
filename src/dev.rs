@@ -392,13 +392,13 @@ impl DevState {
             ));
         }
         if p == "/__dev/command" || p == "/__dev/command/" {
-            return self.handle_command(&req);
+            return self.handle_command(req);
         }
         if p == "/__dev/command/next" || p == "/__dev/command/next/" {
-            return self.handle_command_next(&req);
+            return self.handle_command_next(req);
         }
         if p == "/__dev/command/result" || p == "/__dev/command/result/" {
-            return self.handle_command_result(&req);
+            return self.handle_command_result(req);
         }
         Some(Outgoing::text(404, "not found", "text/plain; charset=utf-8"))
     }
@@ -645,7 +645,8 @@ fn snap_diff(a: &[(String, u128, u64)], b: &[(String, u128, u64)]) -> String {
 fn watcher_loop(state: Arc<DevState>) {
     let poll = std::time::Duration::from_millis(state.poll_ms.max(200));
     let mut www_snap = snapshot_dir(&state.www);
-    let mut src_snaps: Vec<(PathBuf, Vec<(String, u128, u64)>)> = state
+    type DirSnap = Vec<(String, u128, u64)>;
+    let mut src_snaps: Vec<(PathBuf, DirSnap)> = state
         .watch
         .iter()
         .map(|d| (d.clone(), snapshot_dir(d)))

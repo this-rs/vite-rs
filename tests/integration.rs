@@ -135,8 +135,7 @@ fn end_to_end_serving_dev_and_bridge() {
         .to_string();
 
     // 4. If-None-Match -> 304
-    let mut raw = format!("GET /assets/app-h1.js HTTP/1.1\r\nHost: test\r\nIf-None-Match: {etag}\r\nConnection: close\r\n\r\n");
-    let _ = raw;
+    let raw = format!("GET /assets/app-h1.js HTTP/1.1\r\nHost: test\r\nIf-None-Match: {etag}\r\nConnection: close\r\n\r\n");
     let mut s = TcpStream::connect(&addr).unwrap();
     s.set_read_timeout(Some(Duration::from_secs(5))).unwrap();
     s.write_all(format!("GET /assets/app-h1.js HTTP/1.1\r\nHost: test\r\nIf-None-Match: {etag}\r\nConnection: close\r\n\r\n").as_bytes()).unwrap();
