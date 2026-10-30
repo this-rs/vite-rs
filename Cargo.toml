@@ -5,7 +5,7 @@ edition = "2021"
 rust-version = "1.75"
 description = "Tiny Vite-like dev server library: serve a static SPA with hot reload, rebuild-on-change, client error reporting and an AI debugging bridge (browser RPC, console/network capture)."
 license = "MIT"
-keywords = ["vite", "dev-server", "spa", "hot-reload", "debugging", "ai"]
+keywords = ["vite", "dev-server", "spa", "hot-reload", "debugging"]
 categories = ["web-programming::http-server", "development-tools"]
 repository = "https://github.com/this-rs/vite-rs"
 
