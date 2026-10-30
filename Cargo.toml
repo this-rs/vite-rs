@@ -1,6 +1,6 @@
 [package]
 name = "vite-rs"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
 rust-version = "1.75"
 description = "Tiny Vite-like dev server library: serve a static SPA with hot reload, rebuild-on-change, client error reporting and an AI debugging bridge (browser RPC, console/network capture)."
